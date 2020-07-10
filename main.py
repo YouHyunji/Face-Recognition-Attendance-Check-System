@@ -205,18 +205,22 @@ def main():
     #count = 1
     #camera.capture('/home/pi/github/I-CAST/test-data.testasasdsc')
     camera = picamera.PiCamera()
-    camera.close()
-    '''
-    count = 1 # 사람 수 세기 변수
-    while count < 5:
-        s = 'test-data/test'
-        s += '%d' % count
-        s += '.jpg'
-        camera.capture(s)
-        if cv2.waitKey(30) == 27:
-            count += 1
-            continue
-    '''
+    camera.start_preview()
+    cv2.waitKey(1000)
+    camera.resolution = (640, 480)
+    camera.capture('test-data/test2.jpg')
+    camera.stop_preview()
+    
+    # count = 1 # 사람 수 세기 변수
+    #while count < 5:
+    #    s = 'test-data/test'
+    #    s += '%d' % count
+    #    s += '.jpg'
+    #   camera.capture(s)
+    #     if cv2.waitKey(30) == 27:
+    #       count += 1
+    #        continue
+
     '''
     4. 찍은 사진을 저장한다.
     '''
@@ -232,30 +236,32 @@ def main():
     '''
     8. 일치하지 않으면 오류음을 출력한다.
     '''
-    print('Predicting images...')
-    # 테스트 이미지들을 불러온다.
-    test_img1 = cv2.imread('test-data/test1.jpg')
-    test_img2 = cv2.imread('test-data/test2.jpg')
-    test_img3 = cv2.imread('test-data/test3.jpg')
-    print('1')
-    #test_img4 = cv2.imread('test-data/test4.jpg')
-    # 예측을 수행한다.
-    predicted_img1 = predict(test_img1)
-    predicted_img2 = predict(test_img2)
-    predicted_img3 = predict(test_img3)
-    print('2')
-    #predicted_img4 = predict(test_img4)
-    print('Prediction complete')
-    # 모든 이미지들을 표시한다.
-    cv2.imshow(PERSONS[1], cv2.resize(predicted_img1, (400, 500)))
-    cv2.imshow(PERSONS[2], cv2.resize(predicted_img2, (400, 500)))
-    cv2.imshow(PERSONS[3], cv2.resize(predicted_img3, (400, 500)))
-    print('3')
-    #cv2.imshow(PERSONS[4], cv2.resize(predicted_img4, (400, 500)))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-    cv2.destroyAllWindows()
+    try:
+        print('Predicting images...')
+        # 테스트 이미지들을 불러온다.
+        test_img1 = cv2.imread('test-data/test1.jpg')
+        test_img2 = cv2.imread('test-data/test2.jpg')
+        test_img3 = cv2.imread('test-data/test3.jpg')
+        #test_img4 = cv2.imread('test-data/test4.jpg')
+        # 예측을 수행한다.
+        predicted_img1 = predict(test_img1)
+        predicted_img2 = predict(test_img2)
+        predicted_img3 = predict(test_img3)
+        #predicted_img4 = predict(test_img4)
+        print('Prediction complete')
+        # 모든 이미지들을 표시한다.
+        cv2.imshow(PERSONS[1], cv2.resize(predicted_img1, (400, 500)))
+        cv2.imshow(PERSONS[2], cv2.resize(predicted_img2, (400, 500)))
+        cv2.imshow(PERSONS[3], cv2.resize(predicted_img3, (400, 500)))
+        os.system('omxplayer correct.wav')
+        #cv2.imshow(PERSONS[4], cv2.resize(predicted_img4, (400, 500)))
+    except cv2.error:
+        os.system('omxplayer incorrect.wav')
+    finally:
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        cv2.waitKey(1)
+        cv2.destroyAllWindows()
 
 
 #====================#
