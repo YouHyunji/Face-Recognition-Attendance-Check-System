@@ -15,14 +15,14 @@ from picamera.array import PiRGBArray
 import sys
 import time
 import RPi.GPIO as GPIO
-from video import create_capture
-from common import clock, draw_str
+#from video import create_capture
+#from common import clock, draw_str
 
 
 #==================#
 # Global Variables #
 #==================#
-PERSONS = ['', 'HyunJi', 'HwaGyeong', 'Sujin', 'Jungtae', 'MinGyeong', 'MinSoon']
+PERSONS = ['', 'I-RENE', 'Hyun ji', 'So hye']
 
 
 #===========#
@@ -130,6 +130,7 @@ def draw_text(img, text, x, y):
 # - 이미지가 지나갈 때 그 안의 사람을 인식하고,
 # - 감지된 얼굴에 해당하는 사람의 이름을 직사각형 주위에 그려주는 함수이다.
 def predict(test_img):
+    global face_recognizer
     global PERSONS
     # 원본 이미지를 변경하고 싶지 않으므로 복사본을 만든다.
     img = test_img.copy()
@@ -143,11 +144,13 @@ def predict(test_img):
     draw_rectangle(img, rect)
     # 예측된 사람의 이름을 그린다.
     draw_text(img, label_text, rect[0], rect[1]-5)
+    return img
 
 #-----------#
 # main 함수 #
 #-----------#
 def main():
+    global face_recognizer
     '''
     1. 사진 폴더에 있는 이미지들을 가져온다.
     '''
@@ -155,15 +158,17 @@ def main():
     print('Preparing data...')
     # 필요한 인원수는 우선 동아리 6명이므로,
     # 6개의 디렉터리에 해당하는 만큼 준비해야 한다.
-    faces1, labels1 = prepare_training_data('training-data1')
-    faces2, labels2 = prepare_training_data('training-data2')
-    faces3, labels3 = prepare_training_data('training-data3')
-    faces4, labels4 = prepare_training_data('training-data4')
-    faces5, labels5 = prepare_training_data('training-data5')
-    faces6, labels6 = prepare_training_data('training-data6')
+    faces, labels = prepare_training_data('training-data')
+    #faces1, labels1 = prepare_training_data('training-data1')
+    #faces2, labels2 = prepare_training_data('training-data2')
+    #faces3, labels3 = prepare_training_data('training-data3')
+    #faces4, labels4 = prepare_training_data('training-data4')
     # 데이터 준비 완료
     print('Data prepared')
     # 각 데이터의 감지된 수를 출력해준다.
+    print('Total faces: ', len(faces))
+    print('Total labels: ', len(labels))
+    '''
     print('Total faces1: ', len(faces1))
     print('Total labels1: ', len(labels1))
     print('Total faces2: ', len(faces2))
@@ -172,10 +177,7 @@ def main():
     print('Total labels3: ', len(labels3))
     print('Total faces4: ', len(faces4))
     print('Total labels4: ', len(labels4))
-    print('Total faces5: ', len(faces5))
-    print('Total labels5: ', len(labels5))
-    print('Total faces6: ', len(faces6))
-    print('Total labels6: ', len(labels6))
+    '''
     '''
     2. 가져온 이미지들을 학습시킨다.
     '''
@@ -189,21 +191,32 @@ def main():
     # 이 중 3번 선택지를 활용할 것이다.
     face_recognizer = cv2.face.LBPHFaceRecognizer_create()
     # labels의 경우 numpy 모듈의 array를 통해 저장하여 학습시킨다.
-    face_recognizer.train(faces1, np.array(labels1))
-    face_recognizer.train(faces2, np.array(labels2))
-    face_recognizer.train(faces3, np.array(labels3))
-    face_recognizer.train(faces4, np.array(labels4))
-    face_recognizer.train(faces5, np.array(labels5))
-    face_recognizer.train(faces6, np.array(labels6))
+    face_recognizer.train(faces, np.array(labels))
+    #face_recognizer.train(faces1, np.array(labels1))
+    #face_recognizer.train(faces2, np.array(labels2))
+    #face_recognizer.train(faces3, np.array(labels3))
+    #face_recognizer.train(faces4, np.array(labels4))
     '''
     3. 사진을 찍는다.
     - test-data 디렉터리 안에,
-    - 각각 test1, test2, test3, test4, test5, test6이라는 이름으로 저장해야 한다.
+    - 각각 test1, test2, test3, test4 이라는 이름으로 저장해야 한다.
     '''
+    #camera = picamera.PiCamera()
+    #count = 1
+    #camera.capture('/home/pi/github/I-CAST/test-data.testasasdsc')
     camera = picamera.PiCamera()
-    for idx in [1, 2, 3, 4, 5, 6]:
-        # 곧 구현할 예정
-        # 동아리 멤버 6명을 기준으로 사진을 찍는다.
+    camera.close()
+    '''
+    count = 1 # 사람 수 세기 변수
+    while count < 5:
+        s = 'test-data/test'
+        s += '%d' % count
+        s += '.jpg'
+        camera.capture(s)
+        if cv2.waitKey(30) == 27:
+            count += 1
+            continue
+    '''
     '''
     4. 찍은 사진을 저장한다.
     '''
@@ -224,24 +237,21 @@ def main():
     test_img1 = cv2.imread('test-data/test1.jpg')
     test_img2 = cv2.imread('test-data/test2.jpg')
     test_img3 = cv2.imread('test-data/test3.jpg')
-    test_img4 = cv2.imread('test-data/test4.jpg')
-    test_img5 = cv2.imread('test-data/test5.jpg')
-    test_img6 = cv2.imread('test-data/test6.jpg')
+    print('1')
+    #test_img4 = cv2.imread('test-data/test4.jpg')
     # 예측을 수행한다.
     predicted_img1 = predict(test_img1)
     predicted_img2 = predict(test_img2)
     predicted_img3 = predict(test_img3)
-    predicted_img4 = predict(test_img4)
-    predicted_img5 = predict(test_img5)
-    predicted_img6 = predict(test_img6)
+    print('2')
+    #predicted_img4 = predict(test_img4)
     print('Prediction complete')
     # 모든 이미지들을 표시한다.
     cv2.imshow(PERSONS[1], cv2.resize(predicted_img1, (400, 500)))
     cv2.imshow(PERSONS[2], cv2.resize(predicted_img2, (400, 500)))
     cv2.imshow(PERSONS[3], cv2.resize(predicted_img3, (400, 500)))
-    cv2.imshow(PERSONS[4], cv2.resize(predicted_img4, (400, 500)))
-    cv2.imshow(PERSONS[5], cv2.resize(predicted_img5, (400, 500)))
-    cv2.imshow(PERSONS[6], cv2.resize(predicted_img6, (400, 500)))
+    print('3')
+    #cv2.imshow(PERSONS[4], cv2.resize(predicted_img4, (400, 500)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     cv2.waitKey(1)
