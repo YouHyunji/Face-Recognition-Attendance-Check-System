@@ -3,6 +3,7 @@
 - 라즈베리파이 활용
 
 ## 얼굴인식 출석부
+-GitHub 주소
 [https://github.com/YouHyunji/I-CAST.git](https://github.com/YouHyunji/I-CAST.git)
 
 ## 시스템블럭
