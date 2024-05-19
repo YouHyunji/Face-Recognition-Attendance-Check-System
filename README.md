@@ -49,7 +49,7 @@
 
 ## 💻 활동
 <br>
-![icast](https://user-images.githubusercontent.com/152094/87103481-203a6b00-c290-11ea-9e24-c1cf52d9ac70.png) 
+![icast](https://github.com/YouHyunji/Face-Recognition-Attendance-Check-System/assets/54940615/61ea8aab-c43f-445c-b644-55de5cc6c657) 
 
 <br>
 
